@@ -14,16 +14,18 @@ import (
 	"time"
 )
 
-const contentTypeMultipartSigned = "multipart/signed"
-const contentTypeMultipartMixed = "multipart/mixed"
-const contentTypeMultipartAlternative = "multipart/alternative"
-const contentTypeMultipartRelated = "multipart/related"
-const contentTypeTextCalendar = "text/calendar"
-const contentTypeTextHtml = "text/html"
-const contentTypeTextPlain = "text/plain"
-const contentTypeTextExtension = "text/x-"
-const contentTypeApplicationOctetStream = "application/octet-stream"
-const maxDepthOfMultipartMixed = 3
+const (
+	contentTypeMultipartSigned        = "multipart/signed"
+	contentTypeMultipartMixed         = "multipart/mixed"
+	contentTypeMultipartAlternative   = "multipart/alternative"
+	contentTypeMultipartRelated       = "multipart/related"
+	contentTypeTextCalendar           = "text/calendar"
+	contentTypeTextHtml               = "text/html"
+	contentTypeTextPlain              = "text/plain"
+	contentTypeTextExtension          = "text/x-"
+	contentTypeApplicationOctetStream = "application/octet-stream"
+	maxDepthOfMultipartMixed          = 3
+)
 
 // Parse an email message read from io.Reader into parsemail.Email struct
 func Parse(r io.Reader) (email Email, err error) {
@@ -124,8 +126,8 @@ func createEmailFromHeader(header mail.Header) (email Email, err error) {
 		return
 	}
 
-	//decode whole header for easier access to extra fields
-	//todo: should we decode? aren't only standard fields mime encoded?
+	// decode whole header for easier access to extra fields
+	// todo: should we decode? aren't only standard fields mime encoded?
 	email.Header, err = decodeHeaderMime(header)
 	if err != nil {
 		return
@@ -401,7 +403,7 @@ func parseMultipartMixed(msg io.Reader, boundary string, depth int) (textBody, h
 				return textBody, htmlBody, attachments, embeddedFiles, textBodies, htmlBodies, err
 			}
 			embeddedFiles = append(embeddedFiles, ef)
-		} else if contentType == contentTypeApplicationOctetStream {
+		} else if contentType == contentTypeApplicationOctetStream || contentType == "image/png" {
 			at, err := decodeAttachment(part)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, textBodies, htmlBodies, err
