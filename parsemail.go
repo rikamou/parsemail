@@ -403,7 +403,7 @@ func parseMultipartMixed(msg io.Reader, boundary string, depth int) (textBody, h
 				return textBody, htmlBody, attachments, embeddedFiles, textBodies, htmlBodies, err
 			}
 			embeddedFiles = append(embeddedFiles, ef)
-		} else if contentType == contentTypeApplicationOctetStream || contentType == "image/png" {
+		} else if contentType == contentTypeApplicationOctetStream || strings.HasPrefix(contentType, "image/") {
 			at, err := decodeAttachment(part)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, textBodies, htmlBodies, err
