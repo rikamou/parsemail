@@ -110,7 +110,13 @@ func createEmailFromHeader(header mail.Header) (email Email, err error) {
 	email.Cc = hp.parseAddressList(header.Get("Cc"))
 	email.Bcc = hp.parseAddressList(header.Get("Bcc"))
 	// email.Date = hp.parseTime(header.Get("Date"))
-	email.Date = hp.parseTime(header.Get("Delivery-Date"))
+
+	if header.Get("Delivery-Date") != "" {
+		email.Date = hp.parseTime(header.Get("Delivery-Date"))
+	} else {
+		email.Date = hp.parseTime(header.Get("Date"))
+	}
+
 	email.ResentFrom = hp.parseAddressList(header.Get("Resent-From"))
 	email.ResentSender = hp.parseAddress(header.Get("Resent-Sender"))
 	email.ResentTo = hp.parseAddressList(header.Get("Resent-To"))
