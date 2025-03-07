@@ -12,6 +12,8 @@ import (
 	"net/mail"
 	"strings"
 	"time"
+
+	"golang.org/x/net/html/charset"
 )
 
 const (
@@ -111,6 +113,14 @@ func createEmailFromHeader(header mail.Header) (email Email, err error) {
 	email.Bcc = hp.parseAddressList(header.Get("Bcc"))
 	// email.Date = hp.parseTime(header.Get("Date"))
 
+	if len(email.From) <= 0 {
+		from := header.Get("From")
+		address, err := parseAddressWithEncoding(from)
+		if err == nil {
+			email.From = hp.parseAddressList(address)
+		}
+	}
+
 	if header.Get("Delivery-Date") != "" {
 		email.Date = hp.parseTime(header.Get("Delivery-Date"))
 	} else {
@@ -141,6 +151,23 @@ func createEmailFromHeader(header mail.Header) (email Email, err error) {
 	}
 
 	return
+}
+
+func parseAddressWithEncoding(s string) (string, error) {
+	dec := new(mime.WordDecoder)
+	dec.CharsetReader = charset.NewReaderLabel
+	parts := strings.SplitN(s, " <", 2)
+	if len(parts) != 2 {
+		return "", fmt.Errorf("Invalid email format")
+	}
+	encodedName := parts[0]
+	emailPart := "<" + parts[1]
+	decodedName, err := dec.DecodeHeader(encodedName)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("\"%s\" %s", decodedName, emailPart), nil
 }
 
 func parseContentType(contentTypeHeader string) (contentType string, params map[string]string, err error) {
